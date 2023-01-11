@@ -70,6 +70,7 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 					// identifiers
 					'layout'  => __( 'layout', 'acf' ),
 					'layouts' => __( 'layouts', 'acf' ),
+					'Fields'  => __( 'Fields', 'acf' ),
 
 					// min / max
 					'This field requires at least {min} {label} {identifier}' => __( 'This field requires at least {min} {label} {identifier}', 'acf' ),
@@ -279,19 +280,19 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 
 			?>
 <div <?php echo acf_esc_attrs( $div ); ?>>
-	
+
 			<?php acf_hidden_input( array( 'name' => $field['name'] ) ); ?>
-	
+
 	<div class="no-value-message">
 			<?php echo acf_esc_html( $no_value_message ); ?>
 	</div>
-	
+
 	<div class="clones">
 			<?php foreach ( $layouts as $layout ) : ?>
 				<?php $this->render_layout( $field, $layout, 'acfcloneindex', array() ); ?>
 		<?php endforeach; ?>
 	</div>
-	
+
 	<div class="values">
 			<?php
 			if ( ! empty( $field['value'] ) ) :
@@ -311,11 +312,11 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 			endif;
 			?>
 	</div>
-	
+
 	<div class="acf-actions">
 		<a class="acf-button button button-primary" href="#" data-name="add-layout"><?php echo acf_esc_html( $field['button_label'] ); ?></a>
 	</div>
-	
+
 	<script type="text-html" class="tmpl-popup"><ul>
 			<?php
 			foreach ( $layouts as $layout ) :
@@ -335,7 +336,7 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 			?>
 </ul>
 	</script>
-	
+
 </div>
 			<?php
 
@@ -397,7 +398,7 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 
 			?>
 <div <?php echo acf_esc_attr( $div ); ?>>
-			
+
 			<?php
 			acf_hidden_input(
 				array(
@@ -406,21 +407,21 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 				)
 			);
 			?>
-	
+
 	<div class="acf-fc-layout-handle" title="<?php _e( 'Drag to reorder', 'acf' ); ?>" data-name="collapse-layout"><?php echo acf_esc_html( $title ); ?></div>
-	
+
 	<div class="acf-fc-layout-controls">
 		<a class="acf-icon -plus small light acf-js-tooltip" href="#" data-name="add-layout" title="<?php _e( 'Add layout', 'acf' ); ?>"></a>
 		<a class="acf-icon -duplicate small light acf-js-tooltip" href="#" data-name="duplicate-layout" title="<?php _e( 'Duplicate layout', 'acf' ); ?>"></a>
 		<a class="acf-icon -minus small light acf-js-tooltip" href="#" data-name="remove-layout" title="<?php _e( 'Remove layout', 'acf' ); ?>"></a>
 		<a class="acf-icon -collapse small -clear acf-js-tooltip" href="#" data-name="collapse-layout" title="<?php _e( 'Click to toggle', 'acf' ); ?>"></a>
 	</div>
-	
+
 			<?php if ( ! empty( $sub_fields ) ) : ?>
-	
+
 				<?php if ( $layout['display'] == 'table' ) : ?>
 	<table class="acf-table">
-		
+
 		<thead>
 			<tr>
 					<?php
@@ -452,20 +453,20 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 						<?php acf_render_field_label( $sub_field ); ?>
 						<?php acf_render_field_instructions( $sub_field ); ?>
 					</th>
-					<?php endforeach; ?> 
+					<?php endforeach; ?>
 			</tr>
 		</thead>
-		
+
 		<tbody>
 			<tr class="acf-row">
 	<?php else : ?>
-	<div class="acf-fields 
+	<div class="acf-fields
 		<?php
 		if ( $layout['display'] == 'row' ) :
 			?>
 		-left<?php endif; ?>">
 	<?php endif; ?>
-	
+
 					<?php
 
 					// loop though sub fields
@@ -493,7 +494,7 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 					}
 
 					?>
-			
+
 				<?php if ( $layout['display'] == 'table' ) : ?>
 			</tr>
 		</tbody>
@@ -509,30 +510,28 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 
 		}
 
+		/**
+		 * Renders the flexible content field layouts in the field group editor.
+		 *
+		 * @since 3.6
+		 * @date  23/01/13
+		 *
+		 * @param array $field An array holding all the field's data.
+		 */
+		public function render_field_settings( $field ) {
+			$layout_open = apply_filters( 'acf/fields/flexible_content/layout_default_expanded', false );
 
-		/*
-		*  render_field_settings()
-		*
-		*  Create extra options for your field. This is rendered when editing a field.
-		*  The value of $field['name'] can be used (like bellow) to save extra data to the $field
-		*
-		*  @type    action
-		*  @since   3.6
-		*  @date    23/01/13
-		*
-		*  @param   $field  - an array holding all the field's data
-		*/
-
-		function render_field_settings( $field ) {
-
-			// load default layout
+			// Load default layout.
 			if ( empty( $field['layouts'] ) ) {
-
+				$layout_open      = true;
 				$field['layouts'] = array(
 					array(),
 				);
-
 			}
+
+			$field_settings_class = $layout_open ? 'open' : '';
+			$toggle_class         = $layout_open ? 'open' : 'closed';
+			$field_settings_style = $layout_open ? '' : 'display: none;';
 
 			// loop through layouts
 			foreach ( $field['layouts'] as $layout ) {
@@ -544,17 +543,22 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 				$layout_prefix = "{$field['prefix']}[layouts][{$layout['key']}]";
 
 				?>
-				<div class="acf-field acf-field-setting-fc_layout" data-name="fc_layout" data-setting="flexible_content" data-id="<?php echo esc_attr( $layout['key'] ); ?>">
+				<div class="acf-field acf-field-setting-fc_layout" data-name="fc_layout" data-setting="flexible_content" data-layout-label="<?php echo esc_attr( $layout['label'] ); ?>" data-id="<?php echo esc_attr( $layout['key'] ); ?>">
 					<div class="acf-label acf-field-settings-fc_head">
-						<label><?php _e( 'Layout', 'acf' ); ?></label>
+						<div class="acf-fc_draggable">
+							<label class="reorder-layout"><?php esc_attr_e( 'Layout', 'acf' ); ?>
+							<span class="acf-fc-layout-name"></span></label>
+						</div>
+
 						<ul class="acf-bl acf-fl-actions">
-							<li><a class="reorder-layout" href="#" title="<?php _e( 'Reorder Layout', 'acf' ); ?>"><?php _e( 'Reorder', 'acf' ); ?></a></li>
-							<li><a class="delete-layout" href="#" title="<?php _e( 'Delete Layout', 'acf' ); ?>"><?php _e( 'Delete', 'acf' ); ?></a></li>
-							<li><a class="duplicate-layout" href="#" title="<?php _e( 'Duplicate Layout', 'acf' ); ?>"><?php _e( 'Duplicate', 'acf' ); ?></a></li>
-							<li><a class="add-layout" href="#" title="<?php _e( 'Add New Layout', 'acf' ); ?>"><?php _e( 'Add New', 'acf' ); ?></a></li>
+							<li><button class="acf-btn acf-btn-tertiary acf-btn-sm acf-field-setting-fc-delete"><i class="acf-icon acf-icon-trash delete-layout " href="#" title="<?php esc_attr_e( 'Delete Layout', 'acf' ); ?>"></i></button></li>
+							<li><button class="acf-btn acf-btn-tertiary acf-btn-sm acf-field-setting-fc-duplicate"><i class="acf-icon -duplicate duplicate-layout" href="#" title="<?php esc_attr_e( 'Duplicate Layout', 'acf' ); ?>"></i></button></li>
+							<li class="acf-fc-add-layout"><button class="add-layout acf-btn acf-btn-primary add-field" href="#" title="<?php esc_attr_e( 'Add New Layout', 'acf' ); ?>"><i class="acf-icon acf-icon-plus"></i><?php esc_html_e( 'Add Layout', 'acf' ); ?></button></li>
+							<li><button type="button" class="acf-toggle-fc-layout" aria-expanded="true"></li>
+							<li><span class="toggle-indicator  <?php echo esc_attr( $toggle_class ); ?>" aria-hidden="true"></span></li>
 						</ul>
 					</div>
-					<div class="acf-input">
+					<div class="acf-input acf-field-layout-settings <?php echo esc_attr( $field_settings_class ); ?>" style="<?php echo esc_attr( $field_settings_style ); ?>">
 						<?php
 
 						acf_hidden_input(
@@ -568,7 +572,7 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 
 						?>
 					<ul class="acf-fc-meta acf-bl">
-						<li class="acf-fc-meta-label">
+						<li class="acf-fc-meta-label acf-fc-meta-left">
 							<?php
 
 							acf_render_field(
@@ -584,7 +588,7 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 
 							?>
 						</li>
-						<li class="acf-fc-meta-name">
+						<li class="acf-fc-meta-name acf-fc-meta-right">
 								<?php
 
 								acf_render_field(
@@ -600,8 +604,8 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 
 								?>
 						</li>
-						<li class="acf-fc-meta-display">
-							<div class="acf-input-prepend"><?php _e( 'Layout', 'acf' ); ?></div>
+						<li class="acf-fc-meta-display acf-fc-meta-left">
+							<div class="acf-input-prepend"><?php esc_html_e( 'Layout', 'acf' ); ?></div>
 							<div class="acf-input-wrap">
 								<?php
 
@@ -1412,9 +1416,8 @@ if ( ! class_exists( 'acf_field_flexible_content' ) ) :
 
 		function ajax_layout_title() {
 
-			// options
 			$options = acf_parse_args(
-				$_POST,
+				$_POST, // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified elsewhere.
 				array(
 					'post_id'   => 0,
 					'i'         => 0,
