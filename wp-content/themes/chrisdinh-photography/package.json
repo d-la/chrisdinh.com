@@ -20,11 +20,12 @@
   },
   "devDependencies": {
     "@roots/bud": "6.6.9",
-    "@roots/bud-sass": "^6.6.9",
+    "@roots/bud-sass": "6.6.9",
     "@roots/bud-tailwindcss": "6.6.9",
     "@roots/sage": "6.6.9"
   },
   "dependencies": {
+    "@roots/bud-postcss": "6.6.9",
     "caniuse-lite": "^1.0.30001442"
   }
 }
