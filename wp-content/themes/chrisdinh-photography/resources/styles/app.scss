@@ -3,4 +3,6 @@
 @import 'tailwindcss/utilities';
 
 /* Sass imports */
+@import 'mixins/_media.scss';
+@import 'modules/_global.scss';
 @import 'modules/_header.scss';
